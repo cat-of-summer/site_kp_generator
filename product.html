@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор сайта</title>
+    <script src="https://cdn.jsdelivr.net/gh/cat-of-summer/site_kp_generator/app.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 24px 16px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: 15px;
+            color: #2c3e50;
+            background: linear-gradient(160deg, #e8eef2 0%, #f0f4f8 100%);
+            min-height: 100vh;
+        }
+        st-app[\:\:app="site_constructor"] {
+            display: block;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            .active {
+                background: #2c5aa0;
+                color: #fff;
+                border-color: #2c5aa0;
+            }
+            .required {
+                background: #e8b84a !important;
+                border-color: #c99a2e !important;
+            }
+            .suggestion {
+                background: #f4f6f8 !important;
+                border: 1px solid #d0d7de !important;
+            }
+            .site_types {
+                cursor: pointer;
+                margin-bottom: 24px;
+                padding-bottom: 16px;
+                border-bottom: 2px solid #e2e8ee;
+                ul {
+                    display: flex;
+                    gap: 8px;
+                    list-style: none;
+                    margin: 0;
+                    padding: 0;
+                    li {
+                        display: block;
+                        padding: 12px 24px;
+                        border: 1px solid #d0d7de;
+                        border-bottom: none;
+                        border-radius: 6px 6px 0 0;
+                        background: #f4f6f8;
+                        color: #2c3e50;
+                        font-weight: 500;
+                        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+                    }
+                    li:hover {
+                        background: #e2e8ee;
+                    }
+                    li.active {
+                        background: #c9ced3;
+                    }
+                }
+            }
+            .pages {
+                display: grid;
+                grid-template-columns: repeat(10, 1fr);
+                gap: 24px;
+                margin-top: 8px;
+                .availablePages {
+                    grid-column: span 3;
+                    list-style: none;
+                    margin: 0;
+                    padding: 20px;
+                    background: #f8fafc;
+                    border-radius: 8px;
+                    border: 1px solid #e2e8ee;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+                }
+                .availablePages > span,
+                .selectedPages > span,
+                .availableBlocks > span,
+                .selectedBlocks > span {
+                    display: block;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #5a6c7d;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    margin-bottom: 12px;
+                }
+                .availablePages li,
+                .selectedPages li {
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 10px 14px;
+                    margin-bottom: 8px;
+                    border-radius: 6px;
+                    border: 1px solid #e2e8ee;
+                    background: #fff;
+                    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+                }
+                .availablePages li:last-child,
+                .selectedPages li:last-child { margin-bottom: 0; }
+                .availablePages li:hover,
+                .selectedPages li:hover {
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                }
+                .availablePages button,
+                .selectedPages button,
+                .availableBlocks button,
+                .selectedBlocks button {
+                    margin-left: auto;
+                    width: 28px;
+                    height: 28px;
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    background: #fff;
+                    color: #2c5aa0;
+                    font-size: 16px;
+                    line-height: 1;
+                    cursor: pointer;
+                    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+                }
+                .availablePages button:hover,
+                .selectedPages button:hover,
+                .availableBlocks button:hover,
+                .selectedBlocks button:hover {
+                    background: #2c5aa0;
+                    color: #fff;
+                    border-color: #2c5aa0;
+                }
+                .availablePages button:focus,
+                .selectedPages button:focus,
+                .availableBlocks button:focus,
+                .selectedBlocks button:focus {
+                    outline: none;
+                    box-shadow: 0 0 0 2px rgba(44,90,160,0.3);
+                }
+                .right {
+                    grid-column: span 7;
+                    .selectedPages {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        list-style: none;
+                        margin: 0;
+                        padding: 16px;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8ee;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+                    }
+                    .selectedPages li {
+                        flex: 0 0 auto;
+                        margin-bottom: 0;
+                    }
+                    .selectedPage {
+                        display: grid;
+                        grid-template-columns: repeat(10, 1fr);
+                        gap: 20px;
+                        margin-top: 20px;
+                        padding: 24px;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8ee;
+
+                        .page_name {
+                            padding: 0;
+                            margin-bottom: 16px;
+                            grid-column: span 10;
+                            font-size: 18px;
+                            font-weight: 600;
+                            color: #2c3e50;
+                        }
+
+                        .availableBlocks,
+                        .selectedBlocks {
+                            list-style: none;
+                            margin: 0;
+                            padding: 16px;
+                            background: #fff;
+                            border-radius: 8px;
+                            border: 1px solid #e2e8ee;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+                        }
+                        .availableBlocks li,
+                        .selectedBlocks li {
+                            cursor: pointer;
+                            position: relative;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            padding: 10px 14px;
+                            margin-bottom: 8px;
+                            border-radius: 6px;
+                            border: 1px solid #e2e8ee;
+                            background: #fff;
+                            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+                        }
+                        .availableBlocks li:last-child,
+                        .selectedBlocks li:last-child { margin-bottom: 0; }
+                        .availableBlocks li:hover,
+                        .selectedBlocks li:hover {
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                        }
+
+                        .float {
+                            position: absolute;
+                            left: 0;
+                            top: 100%;
+                            margin-top: 4px;
+                            background: #fff;
+                            padding: 14px 18px;
+                            z-index: 1000 !important;
+                            min-width: 33vw;
+                            flex-direction: column;
+                            gap: 8px;
+                            border-radius: 8px;
+                            border: 1px solid #e2e8ee;
+                            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+                            visibility: hidden;
+                            opacity: 0;
+                            transform: translateY(-6px);
+                            display: flex;
+                            flex-direction: column;
+                            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+
+                            ul {
+                                padding: 0;
+                            }
+                        }
+                        .float.visible {
+                            visibility: visible;
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                        .float span {
+                            font-size: 13px;
+                            color: #5a6c7d;
+                            line-height: 1.4;
+                        }
+
+                        .availableBlocks {
+                            grid-column: span 4;
+                        }
+
+                        .selectedBlocks {
+                            grid-column: span 6;
+                        }
+                    }
+                }
+            }
+            .result {
+                margin-top: 32px;
+                padding: 24px;
+                background: #f8fafc;
+                border-radius: 8px;
+                border: 1px solid #e2e8ee;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            }
+            .result > span {
+                display: block;
+                margin-bottom: 8px;
+                font-size: 14px;
+                color: #5a6c7d;
+            }
+            .result > div {
+                margin-top: 16px;
+            }
+            .result label {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 14px;
+                color: #2c3e50;
+            }
+            .result label span {
+                font-weight: 500;
+            }
+            .result input[type="number"] {
+                width: 80px;
+                padding: 8px 12px;
+                border: 1px solid #d0d7de;
+                border-radius: 6px;
+                font-size: 14px;
+                font-family: inherit;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .result input[type="number"]:focus {
+                outline: none;
+                border-color: #2c5aa0;
+                box-shadow: 0 0 0 2px rgba(44,90,160,0.2);
+            }
+            .calcutlated {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid #e2e8ee;
+            }
+            .calcutlated span {
+                display: block;
+                margin-bottom: 6px;
+                font-size: 14px;
+                color: #5a6c7d;
+            }
+            .calcutlated .total {
+                margin-top: 12px;
+                font-size: 18px;
+                font-weight: 700;
+                color: #2c3e50;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <st-app ::app="site_constructor">
+        <div class="site_types">
+            <ul>
+                <li #for="type in data.site_types" 
+                    @click="selectedType = type"
+                    class="{{ selectedType === type ? 'active' : '' }}">
+                    {{ type }}
+                </li>
+            </ul>
+        </div>
+        <div class="pages">
+            <ul class="availablePages">
+                <span #show="availablePages?.length">Доступные страницы</span>
+                <li 
+                    #for="page in availablePages"
+                    class="{{isPageRequired(page)}}">
+                    <span>{{ page.name }}</span>
+                    <button
+                        @click="addPage(page.id)">
+                        +
+                    </button>
+                </li>
+            </ul>
+            <div class="right">
+                <ul class="selectedPages">
+                    <span #show="selectedPages?.length">Выбранные страницы</span>
+                    <li
+                        #for="page in selectedPages"
+                        @click="selectedPage = page"
+                        >
+                        <span>
+                            {{ page.name }}
+                        </span>
+                        <button
+                            @click="removePage(page.id)">
+                            -
+                        </button>
+                    </li>
+                </ul>
+                <div
+                    #show="selectedPage"
+                    class="selectedPage">
+                    <span class="page_name">Выбранная страница: {{ selectedPage?.name }}</span>
+                    <ul class="availableBlocks">
+                        <span #show="availableBlocks?.length">Доступные блоки</span>
+                        <li
+                            #for="block in availableBlocks"
+                            class="{{isBlockRequired(block)}}"
+                            @click="toggleFloat(block.id)">
+                            <span>
+                                {{ block.name }}
+                            </span>
+                            <button
+                                @click="addBlock(block.id)">
+                                +
+                            </button>
+                            <div class="float {{ expandedBlockKey === 'available-' + block.id ? 'visible' : '' }}">
+                                <span>Описание: {{ block.description }}</span>
+                                <span>Содержание: {{ block.content }}</span>
+                                <ul>
+                                    <span>Оценка разработки:</span>
+                                    <li>Дизайн: {{block.design}}</li>
+                                    <li>Фронтэнд: {{block.frontend}}</li>
+                                    <li>Бэкэнд: {{block.backend}}</li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="selectedBlocks">
+                        <span #show="selectedBlocks?.length">Выбранные блоки</span>
+                        <li #for="block in selectedBlocks" @click="toggleFloat(block.id, $index)">
+                            <span>{{ block.name }}</span>
+                            <button
+                                @click="removeBlock(block.id, $index)">
+                                -
+                            </button>
+                            <div class="float {{ expandedBlockKey === 'selected-' + block.id + '-' + $index ? 'visible' : '' }}">
+                                <span>Описание: {{ block.description }}</span>
+                                <span>Содержание: {{ block.content }}</span>
+                                <ul>
+                                    <span>Оценка разработки:</span>
+                                    <li>Дизайн: {{block.design}}</li>
+                                    <li>Фронтэнд: {{block.frontend}}</li>
+                                    <li>Бэкэнд: {{block.backend}}</li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="result">
+            <span>Тип сайта: {{ selectedType }}</span>
+            <span>Количество страниц: {{ selectedPages.length }}</span>
+            <span>Количество блоков: {{ selectedBlocks.length }}</span>
+            <div>
+                <label>
+                    <span>Количество экранов</span>
+                    <input type="number" min="1" max="5" #model="screen_count">
+                </label>
+            </div>
+            <div class="calcutlated">
+                <span>Часы дизайна: {{ designHours }}</span>
+                <span>Часы фронтенда: {{ frontendHours }}</span>
+                <span>Часы бэкенда: {{ backendHours }}</span>
+                <span class="total">Всего часов: {{ +designHours + +frontendHours + +backendHours }}</span>
+            </div>
+        </div>
+    </st-app>
+
+<script>
+
+    let data;
+
+    fetch('https://cdn.jsdelivr.net/gh/cat-of-summer/site_kp_generator/data.json')
+    .then(response => {
+        return response.json();
+    })
+    .then(json => {
+        data = json;
+    })
+    .catch(error => {
+        console.error(error);
+    });
+    
+    App.create({
+        app: 'site_constructor',
+        data: data,
+        screen_count: 1,
+        setup () {
+            data.site_types.forEach(type => {
+                this._selectedPages[type] = [];
+                
+                this._selectedBlocks[type] = {};
+
+                data.pages.filter(page =>
+                    page.site_types.some(siteType => siteType.name === type)
+                ).forEach(page => {
+                    this._selectedBlocks[type][page.id] = [];
+                });
+            });
+
+            this.watch('selectedType', () => {
+                this.selectedPage = null;
+            });
+        },
+        selectedType: null,
+        get availablePages() {
+            return data.pages.filter(page => 
+                page.site_types.some(siteType => siteType.name === this.selectedType && !this._selectedPages[this.selectedType].includes(page.id))
+            )
+        },
+        addPage(page_id) {
+            if (!this._selectedPages[this.selectedType].includes(page_id))
+                this._selectedPages[this.selectedType].push(page_id);
+        },
+        _selectedPages: {},
+        get selectedPages() {
+            return data.pages.filter(page =>
+                this._selectedPages[this.selectedType]?.includes(page.id)
+            );
+        },
+        removePage(page_id) {
+            this._selectedPages[this.selectedType] = this._selectedPages[this.selectedType].filter(id => id !== page_id);
+            this._selectedBlocks[this.selectedType][page_id] = [];
+
+            if (page_id == this.selectedPage.id)
+                this.selectedPage = null;
+        },
+        selectedPage: null,
+        expandedBlockKey: null,
+        _floatCloseTimeout: null,
+        toggleFloat(blockId, index) {
+            const newKey = index !== undefined ? 'selected-' + blockId + '-' + index : 'available-' + blockId;
+            if (this._floatCloseTimeout) {
+                clearTimeout(this._floatCloseTimeout);
+                this._floatCloseTimeout = null;
+            }
+            if (this.expandedBlockKey === newKey) {
+                this.expandedBlockKey = null;
+                return;
+            }
+            this.expandedBlockKey = newKey;
+            this._floatCloseTimeout = setTimeout(() => {
+                this.expandedBlockKey = null;
+                this._floatCloseTimeout = null;
+            }, 3000);
+        },
+        _selectedBlocks: {},
+        get selectedBlocks() {
+            const ids = this._selectedBlocks[this.selectedType]?.[this.selectedPage?.id] || [];
+            return ids.map(id => data.blocks.find(b => b.id === id)).filter(Boolean);
+        },
+        get blocksForCalculation() {
+            const blockIdCount = {};
+            const pages = this.selectedPages || [];
+            const type = this.selectedType;
+            if (!type) return [];
+            for (const page of pages) {
+                const ids = this._selectedBlocks[type]?.[page.id] || [];
+                for (const id of ids) blockIdCount[id] = (blockIdCount[id] || 0) + 1;
+            }
+            const result = [];
+            for (const blockId in blockIdCount) {
+                const block = data.blocks.find(b => b.id === parseInt(blockId, 10));
+                if (!block) continue;
+                const count = (block.once || !block.multiple) ? Math.min(1, blockIdCount[blockId]) : blockIdCount[blockId];
+                for (let i = 0; i < count; i++) result.push(block);
+            }
+            return result;
+        },
+        get availableBlocks() {
+            const ids = this._selectedBlocks[this.selectedType]?.[this.selectedPage?.id] || [];
+            return data.blocks.filter(block =>
+                block.site_types.some(siteType => siteType.name === this.selectedType) &&
+                (block.pages.length === 0 || block.pages.some(page => page.id === this.selectedPage?.id)) &&
+                (!(block.once || block.multiple === false) || !ids.includes(block.id))
+            );
+        },
+        addBlock(block_id) {
+            const arr = this._selectedBlocks[this.selectedType][this.selectedPage.id];
+            const block = data.blocks.find(b => b.id === block_id);
+            if (!block) return;
+            if (block.once === true) {
+                if (!arr.includes(block_id)) arr.push(block_id);
+                return;
+            }
+            if (block.multiple === false) {
+                if (!arr.includes(block_id)) arr.push(block_id);
+                return;
+            }
+            arr.push(block_id);
+        },
+        removeBlock(block_id, index) {
+            this._selectedBlocks[this.selectedType][this.selectedPage.id].splice(index, 1);
+        },
+        isPageRequired(page) {
+            if (page.site_types.some(siteType => siteType.name === this.selectedType && siteType.is_required))
+                return 'required';
+            if (page.groups && page.groups.length) {
+                const selectedIds = new Set(this.selectedPages.map(p => p.id));
+                for (const group of page.groups) {
+                    if (!group.is_required) continue;
+                    const pagesInGroup = this.data.pages.filter(p => p.groups && p.groups.some(g => g.id === group.id));
+                    if (pagesInGroup.some(p => selectedIds.has(p.id)))
+                        return 'required';
+                }
+            }
+            return 'suggestion';
+        },
+        isBlockRequired(block) {
+            return block.site_types.some(siteType => siteType.name === this.selectedType && siteType.is_required) || block.pages.some(page => page.id === this.selectedPage?.id && page.is_required)
+                ? 'required'
+                : '';
+        },
+        get designHours() {
+            return (this.blocksForCalculation.reduce((sum, block) => sum + block.design, 0) * Math.max(1, this.data.design_incrementing_per_screen.slice(0, this.screen_count - 1).reduce((sum, num) => sum + num, 0))).toFixed(1);
+        },
+        get frontendHours() {
+            return (this.blocksForCalculation.reduce((sum, block) => sum + block.frontend, 0) * Math.max(1, this.data.frontend_incrementing_per_screen.slice(0, this.screen_count - 1).reduce((sum, num) => sum + num, 0))).toFixed(1);
+        },
+        get backendHours() {
+            return (this.blocksForCalculation.reduce((sum, block) => sum + block.backend, 0)).toFixed(1)
+        },
+    });
+
+</script>
+
+</body>
+</html>
