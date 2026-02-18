@@ -439,152 +439,148 @@
         return response.json();
     })
     .then(json => {
-        data = json;
-    })
-    .catch(error => {
-        console.error(error);
-    });
-    
-    App.create({
-        app: 'site_constructor',
-        data: data,
-        screen_count: 1,
-        setup () {
-            data.site_types.forEach(type => {
-                this._selectedPages[type] = [];
-                
-                this._selectedBlocks[type] = {};
+        console.log(json);
+        App.create({
+            app: 'site_constructor',
+            data: json,
+            screen_count: 1,
+            setup () {
+                this.data.site_types.forEach(type => {
+                    this._selectedPages[type] = [];
+                    
+                    this._selectedBlocks[type] = {};
 
-                data.pages.filter(page =>
-                    page.site_types.some(siteType => siteType.name === type)
-                ).forEach(page => {
-                    this._selectedBlocks[type][page.id] = [];
+                    this.data.pages.filter(page =>
+                        page.site_types.some(siteType => siteType.name === type)
+                    ).forEach(page => {
+                        this._selectedBlocks[type][page.id] = [];
+                    });
                 });
-            });
 
-            this.watch('selectedType', () => {
-                this.selectedPage = null;
-            });
-        },
-        selectedType: null,
-        get availablePages() {
-            return data.pages.filter(page => 
-                page.site_types.some(siteType => siteType.name === this.selectedType && !this._selectedPages[this.selectedType].includes(page.id))
-            )
-        },
-        addPage(page_id) {
-            if (!this._selectedPages[this.selectedType].includes(page_id))
-                this._selectedPages[this.selectedType].push(page_id);
-        },
-        _selectedPages: {},
-        get selectedPages() {
-            return data.pages.filter(page =>
-                this._selectedPages[this.selectedType]?.includes(page.id)
-            );
-        },
-        removePage(page_id) {
-            this._selectedPages[this.selectedType] = this._selectedPages[this.selectedType].filter(id => id !== page_id);
-            this._selectedBlocks[this.selectedType][page_id] = [];
+                this.watch('selectedType', () => {
+                    this.selectedPage = null;
+                });
+            },
+            selectedType: null,
+            get availablePages() {
+                return this.data.pages.filter(page => 
+                    page.site_types.some(siteType => siteType.name === this.selectedType && !this._selectedPages[this.selectedType].includes(page.id))
+                )
+            },
+            addPage(page_id) {
+                if (!this._selectedPages[this.selectedType].includes(page_id))
+                    this._selectedPages[this.selectedType].push(page_id);
+            },
+            _selectedPages: {},
+            get selectedPages() {
+                return this.data.pages.filter(page =>
+                    this._selectedPages[this.selectedType]?.includes(page.id)
+                );
+            },
+            removePage(page_id) {
+                this._selectedPages[this.selectedType] = this._selectedPages[this.selectedType].filter(id => id !== page_id);
+                this._selectedBlocks[this.selectedType][page_id] = [];
 
-            if (page_id == this.selectedPage.id)
-                this.selectedPage = null;
-        },
-        selectedPage: null,
-        expandedBlockKey: null,
-        _floatCloseTimeout: null,
-        toggleFloat(blockId, index) {
-            const newKey = index !== undefined ? 'selected-' + blockId + '-' + index : 'available-' + blockId;
-            if (this._floatCloseTimeout) {
-                clearTimeout(this._floatCloseTimeout);
-                this._floatCloseTimeout = null;
-            }
-            if (this.expandedBlockKey === newKey) {
-                this.expandedBlockKey = null;
-                return;
-            }
-            this.expandedBlockKey = newKey;
-            this._floatCloseTimeout = setTimeout(() => {
-                this.expandedBlockKey = null;
-                this._floatCloseTimeout = null;
-            }, 3000);
-        },
-        _selectedBlocks: {},
-        get selectedBlocks() {
-            const ids = this._selectedBlocks[this.selectedType]?.[this.selectedPage?.id] || [];
-            return ids.map(id => data.blocks.find(b => b.id === id)).filter(Boolean);
-        },
-        get blocksForCalculation() {
-            const blockIdCount = {};
-            const pages = this.selectedPages || [];
-            const type = this.selectedType;
-            if (!type) return [];
-            for (const page of pages) {
-                const ids = this._selectedBlocks[type]?.[page.id] || [];
-                for (const id of ids) blockIdCount[id] = (blockIdCount[id] || 0) + 1;
-            }
-            const result = [];
-            for (const blockId in blockIdCount) {
-                const block = data.blocks.find(b => b.id === parseInt(blockId, 10));
-                if (!block) continue;
-                const count = (block.once || !block.multiple) ? Math.min(1, blockIdCount[blockId]) : blockIdCount[blockId];
-                for (let i = 0; i < count; i++) result.push(block);
-            }
-            return result;
-        },
-        get availableBlocks() {
-            const ids = this._selectedBlocks[this.selectedType]?.[this.selectedPage?.id] || [];
-            return data.blocks.filter(block =>
-                block.site_types.some(siteType => siteType.name === this.selectedType) &&
-                (block.pages.length === 0 || block.pages.some(page => page.id === this.selectedPage?.id)) &&
-                (!(block.once || block.multiple === false) || !ids.includes(block.id))
-            );
-        },
-        addBlock(block_id) {
-            const arr = this._selectedBlocks[this.selectedType][this.selectedPage.id];
-            const block = data.blocks.find(b => b.id === block_id);
-            if (!block) return;
-            if (block.once === true) {
-                if (!arr.includes(block_id)) arr.push(block_id);
-                return;
-            }
-            if (block.multiple === false) {
-                if (!arr.includes(block_id)) arr.push(block_id);
-                return;
-            }
-            arr.push(block_id);
-        },
-        removeBlock(block_id, index) {
-            this._selectedBlocks[this.selectedType][this.selectedPage.id].splice(index, 1);
-        },
-        isPageRequired(page) {
-            if (page.site_types.some(siteType => siteType.name === this.selectedType && siteType.is_required))
-                return 'required';
-            if (page.groups && page.groups.length) {
-                const selectedIds = new Set(this.selectedPages.map(p => p.id));
-                for (const group of page.groups) {
-                    if (!group.is_required) continue;
-                    const pagesInGroup = this.data.pages.filter(p => p.groups && p.groups.some(g => g.id === group.id));
-                    if (pagesInGroup.some(p => selectedIds.has(p.id)))
-                        return 'required';
+                if (page_id == this.selectedPage.id)
+                    this.selectedPage = null;
+            },
+            selectedPage: null,
+            expandedBlockKey: null,
+            _floatCloseTimeout: null,
+            toggleFloat(blockId, index) {
+                const newKey = index !== undefined ? 'selected-' + blockId + '-' + index : 'available-' + blockId;
+                if (this._floatCloseTimeout) {
+                    clearTimeout(this._floatCloseTimeout);
+                    this._floatCloseTimeout = null;
                 }
-            }
-            return 'suggestion';
-        },
-        isBlockRequired(block) {
-            return block.site_types.some(siteType => siteType.name === this.selectedType && siteType.is_required) || block.pages.some(page => page.id === this.selectedPage?.id && page.is_required)
-                ? 'required'
-                : '';
-        },
-        get designHours() {
-            return (this.blocksForCalculation.reduce((sum, block) => sum + block.design, 0) * Math.max(1, this.data.design_incrementing_per_screen.slice(0, this.screen_count - 1).reduce((sum, num) => sum + num, 0))).toFixed(1);
-        },
-        get frontendHours() {
-            return (this.blocksForCalculation.reduce((sum, block) => sum + block.frontend, 0) * Math.max(1, this.data.frontend_incrementing_per_screen.slice(0, this.screen_count - 1).reduce((sum, num) => sum + num, 0))).toFixed(1);
-        },
-        get backendHours() {
-            return (this.blocksForCalculation.reduce((sum, block) => sum + block.backend, 0)).toFixed(1)
-        },
-    });
+                if (this.expandedBlockKey === newKey) {
+                    this.expandedBlockKey = null;
+                    return;
+                }
+                this.expandedBlockKey = newKey;
+                this._floatCloseTimeout = setTimeout(() => {
+                    this.expandedBlockKey = null;
+                    this._floatCloseTimeout = null;
+                }, 3000);
+            },
+            _selectedBlocks: {},
+            get selectedBlocks() {
+                const ids = this._selectedBlocks[this.selectedType]?.[this.selectedPage?.id] || [];
+                return ids.map(id => this.data.blocks.find(b => b.id === id)).filter(Boolean);
+            },
+            get blocksForCalculation() {
+                const blockIdCount = {};
+                const pages = this.selectedPages || [];
+                const type = this.selectedType;
+                if (!type) return [];
+                for (const page of pages) {
+                    const ids = this._selectedBlocks[type]?.[page.id] || [];
+                    for (const id of ids) blockIdCount[id] = (blockIdCount[id] || 0) + 1;
+                }
+                const result = [];
+                for (const blockId in blockIdCount) {
+                    const block = this.data.blocks.find(b => b.id === parseInt(blockId, 10));
+                    if (!block) continue;
+                    const count = (block.once || !block.multiple) ? Math.min(1, blockIdCount[blockId]) : blockIdCount[blockId];
+                    for (let i = 0; i < count; i++) result.push(block);
+                }
+                return result;
+            },
+            get availableBlocks() {
+                const ids = this._selectedBlocks[this.selectedType]?.[this.selectedPage?.id] || [];
+                return this.data.blocks.filter(block =>
+                    block.site_types.some(siteType => siteType.name === this.selectedType) &&
+                    (block.pages.length === 0 || block.pages.some(page => page.id === this.selectedPage?.id)) &&
+                    (!(block.once || block.multiple === false) || !ids.includes(block.id))
+                );
+            },
+            addBlock(block_id) {
+                const arr = this._selectedBlocks[this.selectedType][this.selectedPage.id];
+                const block = this.data.blocks.find(b => b.id === block_id);
+                if (!block) return;
+                if (block.once === true) {
+                    if (!arr.includes(block_id)) arr.push(block_id);
+                    return;
+                }
+                if (block.multiple === false) {
+                    if (!arr.includes(block_id)) arr.push(block_id);
+                    return;
+                }
+                arr.push(block_id);
+            },
+            removeBlock(block_id, index) {
+                this._selectedBlocks[this.selectedType][this.selectedPage.id].splice(index, 1);
+            },
+            isPageRequired(page) {
+                if (page.site_types.some(siteType => siteType.name === this.selectedType && siteType.is_required))
+                    return 'required';
+                if (page.groups && page.groups.length) {
+                    const selectedIds = new Set(this.selectedPages.map(p => p.id));
+                    for (const group of page.groups) {
+                        if (!group.is_required) continue;
+                        const pagesInGroup = this.data.pages.filter(p => p.groups && p.groups.some(g => g.id === group.id));
+                        if (pagesInGroup.some(p => selectedIds.has(p.id)))
+                            return 'required';
+                    }
+                }
+                return 'suggestion';
+            },
+            isBlockRequired(block) {
+                return block.site_types.some(siteType => siteType.name === this.selectedType && siteType.is_required) || block.pages.some(page => page.id === this.selectedPage?.id && page.is_required)
+                    ? 'required'
+                    : '';
+            },
+            get designHours() {
+                return (this.blocksForCalculation.reduce((sum, block) => sum + block.design, 0) * Math.max(1, this.data.design_incrementing_per_screen.slice(0, this.screen_count - 1).reduce((sum, num) => sum + num, 0))).toFixed(1);
+            },
+            get frontendHours() {
+                return (this.blocksForCalculation.reduce((sum, block) => sum + block.frontend, 0) * Math.max(1, this.data.frontend_incrementing_per_screen.slice(0, this.screen_count - 1).reduce((sum, num) => sum + num, 0))).toFixed(1);
+            },
+            get backendHours() {
+                return (this.blocksForCalculation.reduce((sum, block) => sum + block.backend, 0)).toFixed(1)
+            },
+        });
+    })
 
 </script>
 
